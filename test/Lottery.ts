@@ -3,26 +3,54 @@ import { expect } from 'chai';
 import { ethers } from 'hardhat';
 
 describe('Lottery', function () {
-  async function deployOneYearLockFixture() {
-    const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
-    const ONE_GWEI = 1_000_000_000;
+  async function deployBasicSendTransaction() {
+    const AMOUNT_TO_SEND = ethers.utils.parseEther("0.01");
 
-    const lockedAmount = ONE_GWEI;
-    const unlockTime = (await time.latest()) + ONE_YEAR_IN_SECS;
+    const [owner, account1, account2] = await ethers.getSigners();
 
-    const [owner, otherAccount] = await ethers.getSigners();
+    const Lottery = await ethers.getContractFactory('Lottery');
+    const lottery = await Lottery.deploy();
 
-    const Lock = await ethers.getContractFactory('Lock');
-    const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
-
-    return { lock, unlockTime, lockedAmount, owner, otherAccount };
+    return { owner, account1, account2, lottery, AMOUNT_TO_SEND };
   }
 
-  describe('Deployment', function () {
-    it('Should set the right unlockTime', async function () {
-      const { lock, unlockTime } = await loadFixture(deployOneYearLockFixture);
+  describe('Transaction', function () {
+    it('Lottery balance should be greater or equal to 0.01 (exact amount eth sent)', async function () {
+      const { lottery, AMOUNT_TO_SEND } = await loadFixture(deployBasicSendTransaction);
 
-      expect(await lock.unlockTime()).to.equal(unlockTime);
+      await lottery.participate({value: AMOUNT_TO_SEND});
+      const lotteryBalance = await lottery.provider.getBalance(lottery.address);
+      expect(ethers.utils.parseEther(lotteryBalance.toString())).to.be.gte(AMOUNT_TO_SEND);
+    });
+
+    it('Lottery balance should be equal to 0 (not enough eth sent)', async function () {
+      const { lottery } = await loadFixture(deployBasicSendTransaction);
+
+      await expect(lottery.participate({value: ethers.utils.parseEther("0.0009")})).to.be.revertedWith("Not enough funds");
+    });
+
+    it('Lottery balance should be equal to 0 (fund giveaway)', async function () {
+      const { account1, account2, lottery, AMOUNT_TO_SEND } = await loadFixture(deployBasicSendTransaction);
+
+      await lottery.connect(account1).participate({value: ethers.utils.parseEther("0.01")});
+      await lottery.connect(account2).participate({value: ethers.utils.parseEther("0.01")});
+      const winner = await lottery.lastWinner();
+      const winnerBalance = await lottery.provider.getBalance(winner.toString());
+      expect(winnerBalance).to.be.gt(ethers.utils.parseEther("10000"));
+    });
+  });
+
+  describe('Participants', function () {
+    it('Participants should be erased after giveaway', async function () {
+      const { account1, account2, lottery } = await loadFixture(deployBasicSendTransaction);
+
+      await lottery.connect(account1).participate({value: ethers.utils.parseEther("0.01")});
+      let nbParticipants = await lottery.getParticipantsCount();
+      expect(nbParticipants).to.be.equal(1);
+      
+      await lottery.connect(account2).participate({value: ethers.utils.parseEther("0.01")});
+      nbParticipants = await lottery.getParticipantsCount();
+      expect(nbParticipants).to.be.equal(0);
     });
   });
 });

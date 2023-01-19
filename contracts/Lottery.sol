@@ -6,15 +6,20 @@ pragma solidity ^0.8.9;
 contract Lottery {
     uint maxParticipants;
     uint256 amount;
-    address[] participants;
+    address[] public participants;
+    address public lastWinner;
 
     constructor() {
-        amount = 0;
-        maxParticipants = 10;
+        amount = 1 * 10 ** 16;
+        maxParticipants = 2;
+    }
+
+    function getParticipantsCount() public view returns(uint) {
+        return participants.length;
     }
 
     function userExists() private view returns(bool success) {
-        for (uint i = 0; i < participants.length; i++) {
+        for (uint i = 0; i < getParticipantsCount(); i++) {
             if (participants[i] == msg.sender) {
                 return true;
             }
@@ -22,24 +27,24 @@ contract Lottery {
         return false;
     }
 
-    function participate() external {
-        require(!userExists());
-        require(participants.length < 10);
-        participants.push(msg.sender);
+    function randomWinner() private view returns(uint) {
+        return uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, participants))) % getParticipantsCount();
     }
 
-    function resetParticipants() private {
+    function giveAway() private {
+        address payable winner = payable(participants[randomWinner()]);
+        (bool success, ) = winner.call{ value: address(this).balance }("");
+        require(success);
+        lastWinner = winner;
         delete participants;
     }
 
-    function randomWinner() private view returns(uint) {
-        return uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, participants))) % participants.length;
-    }
-
-    function giveAway() external returns(address) {
-        address winner = participants[randomWinner()];
-        // Send amount to winner address
-        resetParticipants();
-        return winner;
+    function participate() external payable {
+        require(!userExists(), "User exists");
+        require(msg.value >= amount, "Not enough funds");
+        participants.push(msg.sender);
+        if (getParticipantsCount() == maxParticipants) {
+            giveAway();
+        }
     }
 }
