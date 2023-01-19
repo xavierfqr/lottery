@@ -22,7 +22,7 @@ contract Lottery {
         return false;
     }
 
-    function participate() public {
+    function participate() external {
         require(!userExists());
         require(participants.length < 10);
         participants.push(msg.sender);
@@ -32,7 +32,7 @@ contract Lottery {
         delete participants;
     }
 
-    function giveAway() public {
+    function giveAway() external {
         // random give away
         resetParticipants();
     }
