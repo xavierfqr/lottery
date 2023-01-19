@@ -1,13 +1,7 @@
-# Sample Hardhat Project
+deploy locally :
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
+- npx hardhat run scripts/deployLocal.ts
 
-Try running some of the following tasks:
+deploy :
 
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.ts
-```
+- npx hardhat run --network goerli scripts/deploy.ts
