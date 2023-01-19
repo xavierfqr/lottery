@@ -16,10 +16,10 @@ contract Lottery {
     function userExists() private view returns(bool success) {
         for (uint i = 0; i < _participants.length && i < _maxParticipants; i++) {
             if (_participants[i] == msg.sender) {
-                return false;
+                return true;
             }
         }
-        return true;
+        return false;
     }
 
     function participate() public {
