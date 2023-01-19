@@ -14,6 +14,10 @@ contract Lottery {
         maxParticipants = 2;
     }
 
+    function getParticipantsCount() public view returns(uint) {
+        return participants.length;
+    }
+
     function userExists() private view returns(bool success) {
         for (uint i = 0; i < participants.length; i++) {
             if (participants[i] == msg.sender) {
@@ -29,7 +33,8 @@ contract Lottery {
 
     function giveAway() private {
         address payable winner = payable(participants[randomWinner()]);
-        winner.call{ value: address(this).balance };
+        (bool success, ) = winner.call{ value: address(this).balance }("");
+        require(success);
         lastWinner = winner;
         delete participants;
     }
