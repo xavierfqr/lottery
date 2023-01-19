@@ -8,10 +8,12 @@ contract Lottery {
     uint256 amount;
     address[] public participants;
     address public lastWinner;
+    uint256 public test;
 
     constructor() {
         amount = 1 * 10 ** 16;
         maxParticipants = 2;
+        test = 42;
     }
 
     function getParticipantsCount() public view returns(uint) {
