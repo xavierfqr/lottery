@@ -15,7 +15,7 @@ describe('Lottery', function () {
   }
 
   describe('Transaction', function () {
-    it('Lottery balance should be equal to 0.01 (exact amount eth sent)', async function () {
+    it('Lottery balance should be greater or equal to 0.01 (exact amount eth sent)', async function () {
       const { lottery, AMOUNT_TO_SEND } = await loadFixture(deployBasicSendTransaction);
 
       await lottery.participate({value: AMOUNT_TO_SEND});
