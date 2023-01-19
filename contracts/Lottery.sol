@@ -32,12 +32,12 @@ contract Lottery {
         delete participants;
     }
 
-    function random() private view returns(uint) {
-        return uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, participants)));
+    function randomWinner() private view returns(uint) {
+        return uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, participants))) % participants.length;
     }
 
     function giveAway() external returns(address) {
-        address winner = participants[random()];
+        address winner = participants[randomWinner()];
         // Send amount to winner address
         resetParticipants();
         return winner;
