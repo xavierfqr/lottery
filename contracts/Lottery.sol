@@ -4,49 +4,37 @@ pragma solidity ^0.8.9;
 // import "hardhat/console.sol";
 
 contract Lottery {
-    // Users
-    uint256 private _totalUsers;
-    mapping(uint256 => address) private _users;
-    mapping(address => bool) private _participants;
-
+    uint _maxParticipants;
+    address[] _participants;
     uint256 private _amount;
 
     constructor() {
-        _totalUsers = 0;
         _amount = 0;
+        _maxParticipants = 10;
     }
 
-    function userExists() private view returns(bool exists) {
-        for (uint i = 0; i < _totalUsers; i++) {
-            if (_users[i] == msg.sender) {
+    function userExists() private view returns(bool success) {
+        for (uint i = 0; i < _participants.length && i < _maxParticipants; i++) {
+            if (_participants[i] == msg.sender) {
                 return false;
             }
         }
         return true;
     }
 
-    function register() public returns(bool success) {
-        if (!userExists())
-            return false;
-        _users[_totalUsers] = msg.sender;
-        _totalUsers += 1;
-        return true;
-    }
-
-    function participate() public returns(bool success) {
-        if (!userExists())
-            return false;
-        _participants[msg.sender] = true;
+    function participate() public {
+        require(userExists());
+        _participants.push(msg.sender);
     }
 
     function resetParticipants() private {
-        for (uint i = 0; i < _totalUsers; i++) {
-            address tmpAddress = _users[i];
-            _participants[tmpAddress] = false;
+        while (_participants.length > 0) {
+            _participants.pop();
         }
     }
 
     function giveAway() public {
         // random give away
+        resetParticipants();
     }
 }
