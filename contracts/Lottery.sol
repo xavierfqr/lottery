@@ -6,11 +6,12 @@ pragma solidity ^0.8.9;
 contract Lottery {
     uint maxParticipants;
     uint256 amount;
-    address payable[] public participants;
+    address[] public participants;
+    address public lastWinner;
 
     constructor() {
-        amount = 1 * 10 ** 18;
-        maxParticipants = 10;
+        amount = 1 * 10 ** 16;
+        maxParticipants = 2;
     }
 
     function userExists() private view returns(bool success) {
@@ -22,25 +23,24 @@ contract Lottery {
         return false;
     }
 
-    function participate() external payable {
-        require(!userExists());
-        require(participants.length < 10);
-        require(msg.value >= amount);
-        participants.push(payable(msg.sender));
-    }
-
-    function resetParticipants() private {
-        delete participants;
-    }
-
     function randomWinner() private view returns(uint) {
         return uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, participants))) % participants.length;
     }
 
-    function giveAway() external returns(address) {
-        address payable winner = participants[randomWinner()];
+    function giveAway() private {
+        address payable winner = payable(participants[randomWinner()]);
         winner.call{ value: address(this).balance };
-        resetParticipants();
-        return winner;
+        lastWinner = winner;
+        delete participants;
+    }
+
+    function participate() external payable {
+        require(!userExists());
+        require(participants.length < maxParticipants);
+        require(msg.value >= amount);
+        participants.push(msg.sender);
+        if (participants.length == maxParticipants) {
+            giveAway();
+        }
     }
 }
