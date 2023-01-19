@@ -35,5 +35,25 @@ describe('Lottery', function () {
       }
       expect(false);
     });
+
+    it('Lottery balance should be equal to 0 (fund giveaway)', async function () {
+      const { owner, lottery, AMOUNT_TO_SEND } = await loadFixture(deployBasicSendTransaction);
+
+      await lottery.participate({value: ethers.utils.parseEther("1")});
+      await lottery.giveAway();
+      const lotteryBalance = await lottery.provider.getBalance(lottery.address);
+      expect(lotteryBalance.toBigInt() == BigInt(0));
+    });
+  });
+
+  describe('Participants', function () {
+    it('Participants should be erased after giveaway', async function () {
+      const { owner, lottery, AMOUNT_TO_SEND } = await loadFixture(deployBasicSendTransaction);
+
+      await lottery.participate({value: ethers.utils.parseEther("1")});
+      expect(lottery.participants.length == 1);
+      await lottery.giveAway();
+      expect(lottery.participants.length == 0);
+    });
   });
 });

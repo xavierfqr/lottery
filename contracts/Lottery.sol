@@ -6,7 +6,7 @@ pragma solidity ^0.8.9;
 contract Lottery {
     uint maxParticipants;
     uint256 amount;
-    address[] participants;
+    address payable[] public participants;
 
     constructor() {
         amount = 1 * 10 ** 18;
@@ -26,7 +26,7 @@ contract Lottery {
         require(!userExists());
         require(participants.length < 10);
         require(msg.value >= amount);
-        participants.push(msg.sender);
+        participants.push(payable(msg.sender));
     }
 
     function resetParticipants() private {
@@ -38,9 +38,8 @@ contract Lottery {
     }
 
     function giveAway() external returns(address) {
-        address winner = participants[randomWinner()];
-        // Send amount to winner address
-        // msg.sender.transfer
+        address payable winner = participants[randomWinner()];
+        winner.call{ value: address(this).balance };
         resetParticipants();
         return winner;
     }
