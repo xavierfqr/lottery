@@ -32,8 +32,14 @@ contract Lottery {
         delete participants;
     }
 
-    function giveAway() external {
-        // random give away
+    function random() private view returns(uint) {
+        return uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, participants)));
+    }
+
+    function giveAway() external returns(address) {
+        address winner = participants[random()];
+        // Send amount to winner address
         resetParticipants();
+        return winner;
     }
 }
