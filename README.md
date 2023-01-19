@@ -1,3 +1,6 @@
+# Version
+v0.2
+
 deploy locally :
 
 - npx hardhat run scripts/deployLocal.ts

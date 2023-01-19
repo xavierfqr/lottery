@@ -9,7 +9,7 @@ contract Lottery {
     address[] participants;
 
     constructor() {
-        amount = 0;
+        amount = 1 * 10 ** 18;
         maxParticipants = 10;
     }
 
@@ -22,9 +22,10 @@ contract Lottery {
         return false;
     }
 
-    function participate() external {
+    function participate() external payable {
         require(!userExists());
         require(participants.length < 10);
+        require(msg.value >= amount);
         participants.push(msg.sender);
     }
 
@@ -39,6 +40,7 @@ contract Lottery {
     function giveAway() external returns(address) {
         address winner = participants[randomWinner()];
         // Send amount to winner address
+        // msg.sender.transfer
         resetParticipants();
         return winner;
     }

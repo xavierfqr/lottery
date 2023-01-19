@@ -3,26 +3,37 @@ import { expect } from 'chai';
 import { ethers } from 'hardhat';
 
 describe('Lottery', function () {
-  async function deployOneYearLockFixture() {
-    const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
-    const ONE_GWEI = 1_000_000_000;
-
-    const lockedAmount = ONE_GWEI;
-    const unlockTime = (await time.latest()) + ONE_YEAR_IN_SECS;
+  async function deployBasicSendTransaction() {
+    const AMOUNT_TO_SEND = 1 * 10 ** 18;
 
     const [owner, otherAccount] = await ethers.getSigners();
 
-    const Lock = await ethers.getContractFactory('Lock');
-    const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
-
-    return { lock, unlockTime, lockedAmount, owner, otherAccount };
+    const Lottery = await ethers.getContractFactory('Lottery');
+    const lottery = await Lottery.deploy();
+    await lottery.deployed();
+  
+    return { owner, lottery, AMOUNT_TO_SEND };
   }
 
-  describe('Deployment', function () {
-    it('Should set the right unlockTime', async function () {
-      const { lock, unlockTime } = await loadFixture(deployOneYearLockFixture);
+  describe('Transaction', function () {
+    it('Lottery balance should be equal to 1 (exact amount eth sent)', async function () {
+      const { owner, lottery, AMOUNT_TO_SEND } = await loadFixture(deployBasicSendTransaction);
 
-      expect(await lock.unlockTime()).to.equal(unlockTime);
+      await lottery.participate({value: ethers.utils.parseEther("1")});
+      const lotteryBalance = await lottery.provider.getBalance(lottery.address);
+      expect(lotteryBalance.toBigInt() >= AMOUNT_TO_SEND);
+    });
+
+    it('Lottery balance should be equal to 0 (not enough eth sent)', async function () {
+      const { owner, lottery, AMOUNT_TO_SEND } = await loadFixture(deployBasicSendTransaction);
+
+      try {
+        await lottery.participate({value: ethers.utils.parseEther("0.5")});
+      } catch (e) {
+        const lotteryBalance = await lottery.provider.getBalance(lottery.address);
+        expect(lotteryBalance.toBigInt() == BigInt(0));
+      }
+      expect(false);
     });
   });
 });
