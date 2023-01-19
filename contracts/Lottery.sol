@@ -14,7 +14,7 @@ contract Lottery {
     }
 
     function userExists() private view returns(bool success) {
-        for (uint i = 0; i < _participants.length && i < _maxParticipants; i++) {
+        for (uint i = 0; i < _participants.length; i++) {
             if (_participants[i] == msg.sender) {
                 return true;
             }
@@ -23,7 +23,8 @@ contract Lottery {
     }
 
     function participate() public {
-        require(userExists());
+        require(!userExists());
+        require(_participants.length < 10);
         _participants.push(msg.sender);
     }
 
