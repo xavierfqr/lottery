@@ -19,7 +19,7 @@ contract Lottery {
     }
 
     function userExists() private view returns(bool success) {
-        for (uint i = 0; i < participants.length; i++) {
+        for (uint i = 0; i < getParticipantsCount(); i++) {
             if (participants[i] == msg.sender) {
                 return true;
             }
@@ -28,7 +28,7 @@ contract Lottery {
     }
 
     function randomWinner() private view returns(uint) {
-        return uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, participants))) % participants.length;
+        return uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, participants))) % getParticipantsCount();
     }
 
     function giveAway() private {
@@ -40,11 +40,10 @@ contract Lottery {
     }
 
     function participate() external payable {
-        require(!userExists());
-        require(participants.length < maxParticipants);
-        require(msg.value >= amount);
+        require(!userExists(), "User exists");
+        require(msg.value >= amount, "Not enough funds");
         participants.push(msg.sender);
-        if (participants.length == maxParticipants) {
+        if (getParticipantsCount() == maxParticipants) {
             giveAway();
         }
     }

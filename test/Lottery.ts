@@ -15,24 +15,18 @@ describe('Lottery', function () {
   }
 
   describe('Transaction', function () {
-    it('Lottery balance should be equal to 1 (exact amount eth sent)', async function () {
+    it('Lottery balance should be equal to 0.01 (exact amount eth sent)', async function () {
       const { lottery, AMOUNT_TO_SEND } = await loadFixture(deployBasicSendTransaction);
 
       await lottery.participate({value: AMOUNT_TO_SEND});
       const lotteryBalance = await lottery.provider.getBalance(lottery.address);
-      expect(ethers.utils.parseEther(lotteryBalance.toString())).to.gte(AMOUNT_TO_SEND);
+      expect(ethers.utils.parseEther(lotteryBalance.toString())).to.be.gte(AMOUNT_TO_SEND);
     });
 
     it('Lottery balance should be equal to 0 (not enough eth sent)', async function () {
       const { lottery } = await loadFixture(deployBasicSendTransaction);
 
-      try {
-        await lottery.participate({value: ethers.utils.parseEther("0.5")});
-      } catch (e) {
-        const lotteryBalance = await lottery.provider.getBalance(lottery.address);
-        expect(ethers.utils.parseEther(lotteryBalance.toString())).to.equal(ethers.utils.parseEther("0"));
-      }
-      expect(false);
+      await expect(lottery.participate({value: ethers.utils.parseEther("0.0009")})).to.be.revertedWith("Not enough funds");
     });
 
     it('Lottery balance should be equal to 0 (fund giveaway)', async function () {
@@ -42,7 +36,7 @@ describe('Lottery', function () {
       await lottery.connect(account2).participate({value: ethers.utils.parseEther("0.01")});
       const winner = await lottery.lastWinner();
       const winnerBalance = await lottery.provider.getBalance(winner.toString());
-      expect(winnerBalance).to.gt(ethers.utils.parseEther("10000"));
+      expect(winnerBalance).to.be.gt(ethers.utils.parseEther("10000"));
     });
   });
 
@@ -52,11 +46,11 @@ describe('Lottery', function () {
 
       await lottery.connect(account1).participate({value: ethers.utils.parseEther("0.01")});
       let nbParticipants = await lottery.getParticipantsCount();
-      expect(nbParticipants).to.equal(1);
+      expect(nbParticipants).to.be.equal(1);
       
       await lottery.connect(account2).participate({value: ethers.utils.parseEther("0.01")});
       nbParticipants = await lottery.getParticipantsCount();
-      expect(nbParticipants).to.equal(0);
+      expect(nbParticipants).to.be.equal(0);
     });
   });
 });
