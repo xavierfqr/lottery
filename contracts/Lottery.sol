@@ -29,7 +29,7 @@ contract Lottery {
     }
 
     function resetParticipants() private {
-        delete(participants);
+        delete participants;
     }
 
     function giveAway() public {
