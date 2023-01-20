@@ -1,7 +1,6 @@
 import React from 'react';
 import { useLotteryWithoutParameter } from '@/hooks/hooks';
 import { Button, Flex } from '@chakra-ui/react';
-import { ConnectKitButton } from 'connectkit';
 import dynamic from 'next/dynamic';
 const Winner = dynamic(() => import('./Winner'), { ssr: false });
 
@@ -13,8 +12,7 @@ export const HomeSection = () => {
   };
 
   return (
-    <Flex direction="column" align="center" justify="center">
-      <ConnectKitButton />
+    <Flex direction="column" align="center" justify="center" height="100vh" bgColor="blue.100">
       <Button onClick={handleParticipation} isLoading={isLoading}>
         Participate
       </Button>
