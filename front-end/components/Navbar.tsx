@@ -4,7 +4,7 @@ import React from 'react';
 
 export const Navbar = () => {
   return (
-    <Grid templateColumns="repeat(5, 1fr)" justifyItems="center" p={3} bg="blue.400" position="absolute" w="100%">
+    <Grid templateColumns="repeat(5, 1fr)" justifyItems="center" p={3} position="absolute" w="100%">
       <GridItem colStart={3}>
         <Text fontSize="3xl" m="auto">
           Lottery

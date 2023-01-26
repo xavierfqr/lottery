@@ -25,7 +25,9 @@ export default function App({ Component, pageProps }: AppProps) {
     <WagmiConfig client={client}>
       <ConnectKitProvider>
         <ChakraProvider theme={theme}>
+          {/* <div id="app" className="block fixed -z-10 top-0"> */}
           <Component {...pageProps} />
+          {/* </div> */}
         </ChakraProvider>
       </ConnectKitProvider>
     </WagmiConfig>
