@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+    text-shadow: 0 0 5px #ffffff, 0 0 20px #000, 0 0 30px #000;
+}
 
 #app {
     overflow: hidden;
@@ -9,12 +12,11 @@
     color: #ffffff;
     font-family: 'Montserrat', sans-serif;
     text-align: center;
-    text-shadow: 0 0 5px #ffffff, 0 0 20px #000, 0 0 30px #000;
-  }
+}
 
 #app canvas {
     display: block;
     position: fixed;
     z-index: -1;
     top: 0;
-  }
+}
